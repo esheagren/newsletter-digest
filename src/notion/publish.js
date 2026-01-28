@@ -171,7 +171,7 @@ export async function publishToNotion(digest, metadata = {}) {
         database_id: DATABASE_ID
       },
       properties: {
-        // Title property (adjust property name if different in your database)
+        // Title property - using "Name" which is common default
         Name: {
           title: [
             {
@@ -180,20 +180,6 @@ export async function publishToNotion(digest, metadata = {}) {
               }
             }
           ]
-        },
-        // Date property (optional)
-        ...(metadata.date && {
-          Date: {
-            date: {
-              start: metadata.date.toISOString().split('T')[0]
-            }
-          }
-        }),
-        // Status property (optional)
-        Status: {
-          select: {
-            name: 'Published'
-          }
         }
       },
       // Add first batch of blocks
