@@ -1,0 +1,38 @@
+You are selecting the "Best of the Week" articles from a collection of {{ARTICLE_COUNT}} newsletter articles.
+
+# Task
+Select 3-5 articles that are the absolute must-reads of the week.
+
+# Selection Criteria
+
+Choose articles that excel in one or more of these areas:
+
+1. **Original Insight** - Offers a genuinely new perspective or analysis
+2. **Actionable Value** - Readers can immediately apply what they learn
+3. **Timeliness** - Covers an important developing story or trend
+4. **Depth** - Goes beyond surface-level coverage
+5. **Quality of Writing** - Exceptionally well-crafted or engaging
+
+# Anti-Criteria (Avoid selecting articles that are)
+
+- Promotional or advertorial in nature
+- Rehashing widely-covered news without adding insight
+- Extremely niche with limited broad appeal
+- Primarily link roundups without original commentary
+
+# Output Format
+
+Return a JSON object with your selections:
+
+```json
+{
+  "selected": [0, 5, 12, 23, 31],
+  "reasoning": "Brief explanation of the selection logic and what makes these stand out"
+}
+```
+
+Where "selected" contains the article indices (0-based) from the list below.
+
+# Articles
+
+{{ARTICLES}}

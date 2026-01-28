@@ -1,0 +1,27 @@
+{
+  "name": "newsletter-digest",
+  "version": "1.0.0",
+  "description": "Weekly newsletter digest system using AI curation",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "auth": "node src/gmail/auth.js",
+    "fetch": "node src/gmail/fetch.js",
+    "test:extract": "node src/processing/extract.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "@google/generative-ai": "^0.21.0",
+    "@notionhq/client": "^2.2.15",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "googleapis": "^140.0.1",
+    "html-to-text": "^9.0.5",
+    "ml-kmeans": "^6.0.0",
+    "openai": "^4.67.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

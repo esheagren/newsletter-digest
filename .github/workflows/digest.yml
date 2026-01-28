@@ -1,0 +1,60 @@
+name: Weekly Newsletter Digest
+
+on:
+  # Run every Friday at 7am ET (12:00 UTC)
+  schedule:
+    - cron: '0 12 * * 5'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      days_to_fetch:
+        description: 'Number of days to fetch emails from'
+        required: false
+        default: '7'
+        type: string
+
+jobs:
+  generate-digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Decode Gmail credentials
+        run: |
+          echo "${{ secrets.GMAIL_CREDENTIALS_BASE64 }}" | base64 -d > credentials.json
+          echo "${{ secrets.GMAIL_TOKEN_BASE64 }}" | base64 -d > token.json
+
+      - name: Generate digest
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          DAYS_TO_FETCH: ${{ github.event.inputs.days_to_fetch || '7' }}
+        run: npm start
+
+      - name: Upload cache artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: digest-cache-${{ github.run_id }}
+          path: cache/
+          retention-days: 7
+
+      - name: Clean up credentials
+        if: always()
+        run: |
+          rm -f credentials.json token.json

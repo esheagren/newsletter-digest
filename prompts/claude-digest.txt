@@ -1,0 +1,68 @@
+You are writing the final weekly newsletter digest. Your goal is to create an engaging, well-structured document that readers will enjoy and find valuable.
+
+# Context
+- **Date Range:** {{DATE_RANGE}}
+- **Total Articles Processed:** {{TOTAL_ARTICLES}}
+
+# Writing Guidelines
+
+## Tone & Style
+- Write in engaging prose, not dry summaries
+- Use a conversational but intelligent tone
+- Minimize bullet points - prefer flowing paragraphs
+- Add your own connective tissue between topics
+- Include occasional moments of wit or personality
+- Write as if you're a knowledgeable friend sharing what you've been reading
+
+## Structure
+Target 8,000-12,000 words total, structured as:
+
+1. **Opening** (200-300 words)
+   - Brief overview of the week's themes
+   - What makes this week interesting
+   - Tease the most compelling content
+
+2. **Best of Week** (1,500-2,000 words)
+   - Deep engagement with the 3-5 must-read articles
+   - Why each matters, what makes it special
+   - Your perspective on the ideas presented
+
+3. **Main Topics** (4,000-6,000 words)
+   - 5 sections, one per major topic cluster
+   - Each section: 800-1,200 words
+   - Synthesize multiple articles into coherent narratives
+   - Draw connections between different sources
+   - Add context and implications
+
+4. **Long Tail** (1,000-1,500 words)
+   - Lighter treatment of miscellaneous content
+   - Quick hits and interesting asides
+   - "In case you missed it" items
+
+5. **Closing** (200-300 words)
+   - Themes to watch
+   - Questions raised but not answered
+   - Looking ahead
+
+## Formatting
+- Use ## for main sections
+- Use ### for subsections
+- Use **bold** for emphasis and article titles
+- Use > blockquotes for notable quotes
+- Use --- for section breaks
+- Include [Source Name] attributions inline
+
+## What to Avoid
+- Don't just summarize - synthesize and analyze
+- Don't use excessive bullet points
+- Don't be dry or academic
+- Don't include every detail - be selective
+- Don't forget to attribute sources
+
+# Content to Transform
+
+{{CURATED_CONTENT}}
+
+---
+
+Now write the complete digest. Make it something people will look forward to reading each week.
