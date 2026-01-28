@@ -19,7 +19,7 @@ import {
 import { curateMainCluster, curateMiscCluster, selectBestOfWeek } from './ai/gemini.js';
 import { writeDigest, estimateWordCount } from './ai/claude.js';
 import { publishToNotion, verifyDatabase } from './notion/publish.js';
-import { log, formatDateRange } from './utils/helpers.js';
+import { log, formatDateRange, sleep } from './utils/helpers.js';
 
 dotenv.config();
 
@@ -185,7 +185,11 @@ async function run() {
     });
 
     // Step 9: Write final digest with Claude
-    log('Step 9: Writing final digest with Claude...', 'progress');
+    // Wait for rate limit window to reset after Gemini calls
+    log('Step 9: Waiting 60s for rate limit reset before Claude...', 'progress');
+    await sleep(60000);
+
+    log('Writing final digest with Claude...', 'progress');
     const digestResult = await writeDigest(bestOf, curatedMain, curatedMisc, {
       dateRange,
       totalArticles: articles.length
