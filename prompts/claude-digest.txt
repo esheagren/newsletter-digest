@@ -1,4 +1,4 @@
-You are writing a weekly research digest for a thoughtful analyst. Your goal is rigorous, clear analysis—not storytelling.
+You are writing a comprehensive weekly research digest for a thoughtful analyst. Your goal is rigorous, detailed analysis with substantive depth.
 
 # Context
 - **Date Range:** {{DATE_RANGE}}
@@ -7,75 +7,86 @@ You are writing a weekly research digest for a thoughtful analyst. Your goal is 
 # Writing Guidelines
 
 ## Tone & Style
-- Write like a research analyst, not a journalist
-- Be precise and quantitative where possible—include numbers, percentages, timelines
-- Analyze implications and second-order effects
+- Write like a research analyst producing a briefing document
+- Be precise and quantitative—include numbers, percentages, timelines, comparisons
+- Analyze implications, second-order effects, and what developments mean for the future
+- Provide relevant background and context that helps readers understand significance
 - Let the content speak for itself—don't impose artificial narrative coherence
 - If topics are unrelated, treat them as unrelated. Don't force connections.
 - Where genuine trends or patterns exist, highlight them with evidence
-- Be direct and substantive. Cut filler language.
+- Be substantive and thorough. This is a research document, not a summary.
 - Maintain intellectual honesty—note uncertainty, conflicting views, and limitations
 
-## What This Is NOT
-- Not a "weekly themes" narrative where everything connects
-- Not storytelling with dramatic framing
-- Not an attempt to make the week feel coherent
-- Not editorial opinion dressed as analysis
+## Depth of Analysis
+- Go beyond summarizing—explain WHY things matter
+- Include relevant historical context or background where it aids understanding
+- Compare to baselines, previous periods, or benchmarks where applicable
+- Discuss methodology or evidence quality when relevant
+- Note what's missing or what questions remain unanswered
+- Provide analytical commentary that adds value beyond the source material
 
 ## What This IS
-- A rigorous survey of important developments
-- Analysis of implications and what they mean going forward
-- Quantitative where data exists
-- Clear about what we know vs. what's speculation
-- Useful for decision-making
+- A comprehensive research briefing with real analytical depth
+- Quantitative and evidence-based where data exists
+- Clear about what's known vs. speculation
+- Detailed enough to inform decision-making
+- Well-cited with links to every source mentioned
 
 ## Structure
-Target 6,000-10,000 words total:
+Target 15,000-25,000 words total:
 
-1. **Executive Summary** (150-250 words)
-   - Key developments worth attention, listed concisely
-   - No narrative framing—just the important items
+1. **Executive Summary** (300-500 words)
+   - Key developments worth attention
+   - Organized by domain/topic, not narrative
+   - Include the most important quantitative findings
 
-2. **Best of Week** (1,500-2,000 words)
+2. **Best of Week** (3,000-4,000 words)
    - 3-5 articles that merit deep analysis
-   - For each: what's the core finding/argument, why it matters, what are the implications
-   - Include source links
-   - Be specific about claims and evidence
+   - For each: core finding, evidence, implications, limitations
+   - **Always include the source link**: [Article Title](url)
+   - Provide enough context that readers understand significance
+   - 600-800 words per article
 
-3. **Topic Sections** (3,000-5,000 words)
+3. **Topic Sections** (8,000-14,000 words)
    - One section per major topic cluster
-   - Analyze the substance: what happened, what data supports it, what it implies
-   - Note disagreements between sources where they exist
-   - Include relevant quantitative details
+   - Each section: 1,500-2,500 words
+   - Analyze substance: what happened, what data supports it, what it implies
+   - Include background/context that aids understanding
+   - Note disagreements between sources
+   - **Cite every article mentioned with a link**: [Source](url)
    - Don't stretch to connect unrelated topics
 
-4. **Additional Coverage** (800-1,200 words)
-   - Briefer treatment of remaining items
-   - Focus on what's actionable or notable
-   - Fine to use bullet points here for efficiency
+4. **Additional Coverage** (2,000-3,000 words)
+   - Fuller treatment of remaining items—not just brief mentions
+   - Each item: 150-300 words with context and links
+   - **Every item must include its source link**
 
-5. **Open Questions** (100-200 words)
+5. **Open Questions** (200-400 words)
    - What remains uncertain or unresolved
    - What to watch for
+   - Methodological limitations or data gaps noted in sources
 
 ## Formatting
 - Use ## for main sections
 - Use ### for subsections
 - Use **bold** for emphasis and article titles
-- Use > blockquotes sparingly, for genuinely notable quotes
+- Use > blockquotes for genuinely notable quotes
 - Use --- for section breaks
-- Include [Source Name] attributions
 
-## Links
-- **Include links when mentioning articles** using markdown: [Title](url)
-- Links let readers verify claims and go deeper
+## Links - CRITICAL
+- **Every article or source mentioned MUST include a markdown link**: [Title](url)
+- Links are provided in the source material—use them
+- If an article is discussed, it must be linked
+- This allows readers to verify claims and access original sources
+- No article should be referenced without a link
 
 ## What to Avoid
 - Forcing "common threads" or "themes of the week" where none exist
-- Dramatic or literary framing ("This week revealed...", "A pattern emerges...")
-- Excessive hedging or filler ("It's worth noting that...", "Interestingly...")
+- Dramatic or literary framing
+- Excessive hedging or filler language
 - Repeating content between sections
 - Speculation presented as analysis
+- Mentioning any article without linking to it
 
 # Content to Transform
 
@@ -83,4 +94,4 @@ Target 6,000-10,000 words total:
 
 ---
 
-Write the digest. Prioritize clarity, rigor, and usefulness over narrative appeal.
+Write the complete digest. Be thorough, analytical, and ensure every source is properly linked.

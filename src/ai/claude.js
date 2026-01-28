@@ -14,8 +14,8 @@ const anthropic = new Anthropic({
 });
 
 const MODEL = 'claude-sonnet-4-20250514';
-const MAX_TOKENS = 16000; // Allow for long digest
-const MAX_INPUT_CHARS = 80000; // ~20K tokens input to stay under rate limits
+const MAX_TOKENS = 32000; // Allow for comprehensive digest (15-25k words)
+const MAX_INPUT_CHARS = 150000; // ~37K tokens input - more content for longer output
 
 const PROMPTS_DIR = new URL('../../prompts/', import.meta.url).pathname;
 
@@ -40,8 +40,8 @@ function truncateText(text, maxLength) {
  */
 function formatCuratedContent(bestOf, mainClusters, miscCluster) {
   let content = '';
-  const MAX_CLUSTER_CONTENT = 12000; // Max chars per cluster
-  const MAX_ARTICLE_CONTENT = 2000; // Max chars per best-of article
+  const MAX_CLUSTER_CONTENT = 25000; // Max chars per cluster - increased for more detail
+  const MAX_ARTICLE_CONTENT = 4000; // Max chars per best-of article - increased for depth
 
   // Best of Week section
   content += '## BEST OF WEEK\n\n';
