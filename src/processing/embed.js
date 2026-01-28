@@ -13,13 +13,15 @@ const openai = new OpenAI({
 });
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
-const BATCH_SIZE = 100; // OpenAI allows up to 2048, but smaller batches are safer
-const MAX_INPUT_TOKENS = 8191; // Model limit
+const BATCH_SIZE = 20; // Smaller batches to stay under token limits
+const MAX_INPUT_TOKENS = 8191; // Model limit per individual text
+const MAX_CHARS_PER_ARTICLE = 6000; // ~1500 tokens per article, safe margin
 
 /**
- * Truncate text to fit within token limit (rough estimate: 4 chars per token)
+ * Truncate text to fit within token limit
+ * Using smaller limit per article so batches don't exceed total API limit
  */
-function truncateForEmbedding(text, maxChars = MAX_INPUT_TOKENS * 4) {
+function truncateForEmbedding(text, maxChars = MAX_CHARS_PER_ARTICLE) {
   if (text.length <= maxChars) return text;
   return text.slice(0, maxChars);
 }
