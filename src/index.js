@@ -161,8 +161,21 @@ async function run() {
 
     // Step 8: Curate each cluster with Gemini
     log('Step 8: Curating clusters with Gemini...', 'progress');
-    const mainClusters = mergedClusters.filter(c => c.type === 'main');
+
+    // Remove best-of articles from clusters to avoid repetition in the digest
+    const bestOfIds = new Set(bestOf.selected.map(a => a.id));
+    const mainClusters = mergedClusters
+      .filter(c => c.type === 'main')
+      .map(cluster => ({
+        ...cluster,
+        articles: cluster.articles.filter(a => !bestOfIds.has(a.id))
+      }))
+      .filter(cluster => cluster.articles.length > 0); // Remove empty clusters
+
     const miscCluster = mergedClusters.find(c => c.type === 'miscellaneous');
+    if (miscCluster) {
+      miscCluster.articles = miscCluster.articles.filter(a => !bestOfIds.has(a.id));
+    }
 
     const curatedMain = [];
     for (const cluster of mainClusters) {

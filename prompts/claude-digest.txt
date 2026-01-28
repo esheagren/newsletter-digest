@@ -58,6 +58,7 @@ Target 8,000-12,000 words total, structured as:
 - Don't be dry or academic
 - Don't include every detail - be selective
 - Don't forget to attribute sources
+- **IMPORTANT: Don't repeat content between sections** - Articles in "Best of Week" have been removed from the topic clusters, so each piece of content should only appear once in the digest
 
 # Content to Transform
 
