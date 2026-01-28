@@ -19,17 +19,26 @@ if (!DATABASE_ID) {
 }
 
 /**
- * Parse text with markdown links into Notion rich_text array
- * Converts [text](url) into clickable hyperlinks
+ * Parse text with markdown formatting into Notion rich_text array
+ * Converts:
+ * - [text](url) into clickable hyperlinks
+ * - **text** into bold text
+ * - *text* into italic text
  */
 function parseRichText(text) {
+  if (!text) return [{ type: 'text', text: { content: '' } }];
+
   const richText = [];
-  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+  // Combined regex for links, bold, and italic
+  // Order matters: check bold (**) before italic (*)
+  const tokenRegex = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|\*([^*]+)\*/g;
+
   let lastIndex = 0;
   let match;
 
-  while ((match = linkRegex.exec(text)) !== null) {
-    // Add text before the link
+  while ((match = tokenRegex.exec(text)) !== null) {
+    // Add plain text before this match
     if (match.index > lastIndex) {
       const beforeText = text.slice(lastIndex, match.index);
       if (beforeText) {
@@ -40,19 +49,35 @@ function parseRichText(text) {
       }
     }
 
-    // Add the link
-    richText.push({
-      type: 'text',
-      text: {
-        content: match[1], // link text
-        link: { url: match[2] } // URL
-      }
-    });
+    if (match[1] !== undefined && match[2] !== undefined) {
+      // Link: [text](url)
+      richText.push({
+        type: 'text',
+        text: {
+          content: match[1],
+          link: { url: match[2] }
+        }
+      });
+    } else if (match[3] !== undefined) {
+      // Bold: **text**
+      richText.push({
+        type: 'text',
+        text: { content: match[3] },
+        annotations: { bold: true }
+      });
+    } else if (match[4] !== undefined) {
+      // Italic: *text*
+      richText.push({
+        type: 'text',
+        text: { content: match[4] },
+        annotations: { italic: true }
+      });
+    }
 
     lastIndex = match.index + match[0].length;
   }
 
-  // Add remaining text after last link
+  // Add remaining text after last match
   if (lastIndex < text.length) {
     richText.push({
       type: 'text',
@@ -60,7 +85,7 @@ function parseRichText(text) {
     });
   }
 
-  // If no links found, return simple text
+  // If nothing was parsed, return the original text
   if (richText.length === 0) {
     return [{ type: 'text', text: { content: text } }];
   }
