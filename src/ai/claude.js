@@ -53,6 +53,15 @@ function formatCuratedContent(bestOf, mainClusters, miscCluster) {
     content += `**Source:** ${article.source}\n`;
     content += `**Date:** ${article.date.toLocaleDateString()}\n\n`;
     content += `${truncateText(article.content, MAX_ARTICLE_CONTENT)}\n\n`;
+    // Include links if available
+    if (article.links && article.links.length > 0) {
+      const topLinks = article.links.slice(0, 3);
+      content += `**Links:**\n`;
+      for (const link of topLinks) {
+        content += `- [${link.text}](${link.url})\n`;
+      }
+      content += '\n';
+    }
     content += '---\n\n';
   }
 

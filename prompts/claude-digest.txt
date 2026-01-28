@@ -26,6 +26,7 @@ Target 8,000-12,000 words total, structured as:
    - Deep engagement with the 3-5 must-read articles
    - Why each matters, what makes it special
    - Your perspective on the ideas presented
+   - **Include the source links** at the end of each Best of Week article so readers can access the original
 
 3. **Main Topics** (4,000-6,000 words)
    - 5 sections, one per major topic cluster
