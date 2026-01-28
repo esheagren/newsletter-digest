@@ -15,6 +15,7 @@ const anthropic = new Anthropic({
 
 const MODEL = 'claude-sonnet-4-20250514';
 const MAX_TOKENS = 16000; // Allow for long digest
+const MAX_INPUT_CHARS = 80000; // ~20K tokens input to stay under rate limits
 
 const PROMPTS_DIR = new URL('../../prompts/', import.meta.url).pathname;
 
@@ -27,10 +28,20 @@ async function loadPrompt(name) {
 }
 
 /**
- * Format curated content for Claude
+ * Truncate text to a maximum length
+ */
+function truncateText(text, maxLength) {
+  if (!text || text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + '... [truncated]';
+}
+
+/**
+ * Format curated content for Claude with size limits
  */
 function formatCuratedContent(bestOf, mainClusters, miscCluster) {
   let content = '';
+  const MAX_CLUSTER_CONTENT = 12000; // Max chars per cluster
+  const MAX_ARTICLE_CONTENT = 2000; // Max chars per best-of article
 
   // Best of Week section
   content += '## BEST OF WEEK\n\n';
@@ -41,7 +52,7 @@ function formatCuratedContent(bestOf, mainClusters, miscCluster) {
     content += `### ${article.subject}\n`;
     content += `**Source:** ${article.source}\n`;
     content += `**Date:** ${article.date.toLocaleDateString()}\n\n`;
-    content += `${article.content}\n\n`;
+    content += `${truncateText(article.content, MAX_ARTICLE_CONTENT)}\n\n`;
     content += '---\n\n';
   }
 
@@ -52,11 +63,11 @@ function formatCuratedContent(bestOf, mainClusters, miscCluster) {
     content += `(${cluster.originalArticleCount || cluster.articles?.length || 0} articles, ${cluster.strategy} curation)\n\n`;
 
     if (cluster.curatedContent) {
-      content += cluster.curatedContent;
+      content += truncateText(cluster.curatedContent, MAX_CLUSTER_CONTENT);
     } else if (cluster.articles) {
-      for (const article of cluster.articles) {
+      for (const article of cluster.articles.slice(0, 3)) {
         content += `#### ${article.subject}\n`;
-        content += `${article.content.slice(0, 1000)}...\n\n`;
+        content += `${truncateText(article.content, 800)}\n\n`;
       }
     }
     content += '\n---\n\n';
@@ -65,13 +76,19 @@ function formatCuratedContent(bestOf, mainClusters, miscCluster) {
   // Long tail section
   content += '## LONG TAIL / MISCELLANEOUS\n\n';
   if (miscCluster.curatedContent) {
-    content += miscCluster.curatedContent;
+    content += truncateText(miscCluster.curatedContent, MAX_CLUSTER_CONTENT);
   } else if (miscCluster.articles) {
-    for (const article of miscCluster.articles) {
+    for (const article of miscCluster.articles.slice(0, 5)) {
       content += `### ${article.subject}\n`;
       content += `**Source:** ${article.source}\n\n`;
-      content += `${article.content.slice(0, 500)}...\n\n`;
+      content += `${truncateText(article.content, 400)}\n\n`;
     }
+  }
+
+  // Final safety truncation
+  if (content.length > MAX_INPUT_CHARS) {
+    log(`Truncating content from ${content.length} to ${MAX_INPUT_CHARS} chars`, 'warn');
+    content = content.slice(0, MAX_INPUT_CHARS) + '\n\n[Content truncated due to length]';
   }
 
   return content;
