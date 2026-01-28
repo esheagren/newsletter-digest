@@ -61,6 +61,12 @@ Target 8,000-12,000 words total, structured as:
 - Don't forget to attribute sources
 - **IMPORTANT: Don't repeat content between sections** - Articles in "Best of Week" have been removed from the topic clusters, so each piece of content should only appear once in the digest
 
+## Links
+- **Include links whenever you mention an article** using markdown format: [Article Title](url)
+- Links are provided in the source material - use them to let readers access original content
+- For Best of Week articles, always include the source link
+- For articles mentioned in Main Topics, include links where provided
+
 # Content to Transform
 
 {{CURATED_CONTENT}}

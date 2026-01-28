@@ -20,7 +20,7 @@ Curate a cluster of {{ARTICLE_COUNT}} newsletter articles on the topic: **{{CLUS
    - Key arguments and conclusions
    - Important data points or statistics
    - Notable quotes or insights
-   - Relevant links
+   - **Include links in markdown format**: [Link Text](url) - these will become clickable in the final output
 
 3. **For remaining articles**, synthesize into:
    - Common themes and trends
@@ -41,7 +41,7 @@ Curate a cluster of {{ARTICLE_COUNT}} newsletter articles on the topic: **{{CLUS
 - [Takeaway 1]
 - [Takeaway 2]
 
-**Notable Links:** [If relevant]
+**Read More:** [Article Title](url) - include the main link to the original article
 
 ---
 

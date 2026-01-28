@@ -19,6 +19,56 @@ if (!DATABASE_ID) {
 }
 
 /**
+ * Parse text with markdown links into Notion rich_text array
+ * Converts [text](url) into clickable hyperlinks
+ */
+function parseRichText(text) {
+  const richText = [];
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    // Add text before the link
+    if (match.index > lastIndex) {
+      const beforeText = text.slice(lastIndex, match.index);
+      if (beforeText) {
+        richText.push({
+          type: 'text',
+          text: { content: beforeText }
+        });
+      }
+    }
+
+    // Add the link
+    richText.push({
+      type: 'text',
+      text: {
+        content: match[1], // link text
+        link: { url: match[2] } // URL
+      }
+    });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text after last link
+  if (lastIndex < text.length) {
+    richText.push({
+      type: 'text',
+      text: { content: text.slice(lastIndex) }
+    });
+  }
+
+  // If no links found, return simple text
+  if (richText.length === 0) {
+    return [{ type: 'text', text: { content: text } }];
+  }
+
+  return richText;
+}
+
+/**
  * Convert markdown-ish text to Notion blocks
  */
 function textToNotionBlocks(text) {
@@ -41,7 +91,7 @@ function textToNotionBlocks(text) {
         object: 'block',
         type: 'heading_1',
         heading_1: {
-          rich_text: [{ type: 'text', text: { content: line.slice(2).trim() } }]
+          rich_text: parseRichText(line.slice(2).trim())
         }
       });
       i++;
@@ -54,7 +104,7 @@ function textToNotionBlocks(text) {
         object: 'block',
         type: 'heading_2',
         heading_2: {
-          rich_text: [{ type: 'text', text: { content: line.slice(3).trim() } }]
+          rich_text: parseRichText(line.slice(3).trim())
         }
       });
       i++;
@@ -67,7 +117,7 @@ function textToNotionBlocks(text) {
         object: 'block',
         type: 'heading_3',
         heading_3: {
-          rich_text: [{ type: 'text', text: { content: line.slice(4).trim() } }]
+          rich_text: parseRichText(line.slice(4).trim())
         }
       });
       i++;
@@ -91,7 +141,7 @@ function textToNotionBlocks(text) {
         object: 'block',
         type: 'bulleted_list_item',
         bulleted_list_item: {
-          rich_text: [{ type: 'text', text: { content: line.slice(2).trim() } }]
+          rich_text: parseRichText(line.slice(2).trim())
         }
       });
       i++;
@@ -105,7 +155,7 @@ function textToNotionBlocks(text) {
         object: 'block',
         type: 'numbered_list_item',
         numbered_list_item: {
-          rich_text: [{ type: 'text', text: { content: numberedMatch[1].trim() } }]
+          rich_text: parseRichText(numberedMatch[1].trim())
         }
       });
       i++;
@@ -118,7 +168,7 @@ function textToNotionBlocks(text) {
         object: 'block',
         type: 'quote',
         quote: {
-          rich_text: [{ type: 'text', text: { content: line.slice(2).trim() } }]
+          rich_text: parseRichText(line.slice(2).trim())
         }
       });
       i++;
@@ -140,7 +190,7 @@ function textToNotionBlocks(text) {
         object: 'block',
         type: 'paragraph',
         paragraph: {
-          rich_text: [{ type: 'text', text: { content: chunk } }]
+          rich_text: parseRichText(chunk)
         }
       });
     }
