@@ -1,8 +1,13 @@
 /**
  * Newsletter Digest System - Main Orchestration
  *
- * Ingests newsletter emails, clusters by topic, curates with Gemini,
- * writes final digest with Claude, and publishes to Notion.
+ * New Architecture:
+ * 1. Fetch & extract emails
+ * 2. Embed & cluster into 12 groups
+ * 3. Gemini selects top 4 articles for deep analysis
+ * 4. Gemini writes summaries for each cluster (isolated calls, no contamination)
+ * 5. Claude writes deep analysis of only the top 4 articles
+ * 6. Combine and publish to Notion
  */
 
 import dotenv from 'dotenv';
@@ -13,11 +18,10 @@ import { processEmails } from './processing/extract.js';
 import { generateEmbeddings } from './processing/embed.js';
 import {
   clusterArticles,
-  mergeMiscellaneousClusters,
   generateClusterLabel
 } from './processing/cluster.js';
-import { curateMainCluster, curateMiscCluster, selectBestOfWeek } from './ai/gemini.js';
-import { writeDigest, estimateWordCount } from './ai/claude.js';
+import { writeClusterSummary, selectTopArticles } from './ai/gemini.js';
+import { writeDeepAnalysis, assembleDigest, estimateWordCount } from './ai/claude.js';
 import { publishToNotion, verifyDatabase } from './notion/publish.js';
 import { log, formatDateRange, sleep } from './utils/helpers.js';
 
@@ -39,8 +43,9 @@ for (const envVar of REQUIRED_ENV_VARS) {
 }
 
 const CACHE_DIR = new URL('../cache/', import.meta.url).pathname;
-const CLUSTER_COUNT = parseInt(process.env.CLUSTER_COUNT || '8', 10);
+const CLUSTER_COUNT = parseInt(process.env.CLUSTER_COUNT || '12', 10);
 const DAYS_TO_FETCH = parseInt(process.env.DAYS_TO_FETCH || '7', 10);
+const TOP_ARTICLES_COUNT = parseInt(process.env.TOP_ARTICLES_COUNT || '4', 10);
 
 // Validate configuration values
 if (isNaN(CLUSTER_COUNT) || CLUSTER_COUNT < 1 || CLUSTER_COUNT > 50) {
@@ -54,7 +59,6 @@ if (isNaN(DAYS_TO_FETCH) || DAYS_TO_FETCH < 1 || DAYS_TO_FETCH > 90) {
  * Save intermediate results for recovery
  */
 async function saveCache(name, data) {
-  // recursive: true makes this operation idempotent and safe for concurrent calls
   await mkdir(CACHE_DIR, { recursive: true });
   await writeFile(
     `${CACHE_DIR}${name}.json`,
@@ -72,7 +76,8 @@ async function run() {
     newslettersFound: 0,
     articlesExtracted: 0,
     clustersFormed: 0,
-    tokensUsed: { gemini: 0, claude: { input: 0, output: 0 } }
+    topArticlesSelected: 0,
+    tokensUsed: { claude: { input: 0, output: 0 } }
   };
 
   try {
@@ -132,7 +137,7 @@ async function run() {
       embedding: e.embedding
     })));
 
-    // Step 6: Cluster articles
+    // Step 6: Cluster articles into 12 groups
     log('Step 6: Clustering articles by topic...', 'progress');
     const { clusters } = clusterArticles(embeddedArticles, CLUSTER_COUNT);
     stats.clustersFormed = clusters.length;
@@ -142,85 +147,97 @@ async function run() {
       cluster.label = generateClusterLabel(cluster);
     }
 
-    const mergedClusters = mergeMiscellaneousClusters(clusters);
-    await saveCache('clusters', mergedClusters.map(c => ({
+    await saveCache('clusters', clusters.map(c => ({
       id: c.id,
       label: c.label,
-      type: c.type,
       articleCount: c.articles.length,
       articleIds: c.articles.map(a => a.id)
     })));
 
-    // Step 7: Select best of week
-    log('Step 7: Selecting best articles of the week...', 'progress');
-    const bestOf = await selectBestOfWeek(articles);
-    await saveCache('best-of', {
-      selected: bestOf.selected.map(a => a.id),
-      reasoning: bestOf.reasoning
+    log(`Created ${clusters.length} topic clusters`, 'success');
+
+    // Step 7: Gemini selects top articles for deep analysis
+    log('Step 7: Selecting top articles for deep analysis...', 'progress');
+    const topSelection = await selectTopArticles(articles, TOP_ARTICLES_COUNT);
+    stats.topArticlesSelected = topSelection.selected.length;
+
+    await saveCache('top-articles', {
+      selected: topSelection.selected.map(a => ({ id: a.id, subject: a.subject, source: a.source })),
+      reasoning: topSelection.reasoning
     });
 
-    // Step 8: Curate each cluster with Gemini
-    log('Step 8: Curating clusters with Gemini...', 'progress');
+    log(`Selected ${topSelection.selected.length} articles for deep analysis`, 'success');
 
-    // Remove best-of articles from clusters to avoid repetition in the digest
-    const bestOfIds = new Set(bestOf.selected.map(a => a.id));
-    const mainClusters = mergedClusters
-      .filter(c => c.type === 'main')
-      .map(cluster => ({
-        ...cluster,
-        articles: cluster.articles.filter(a => !bestOfIds.has(a.id))
-      }))
-      .filter(cluster => cluster.articles.length > 0); // Remove empty clusters
+    // Step 8: Gemini writes cluster summaries (isolated calls - no contamination)
+    log('Step 8: Writing cluster summaries with Gemini...', 'progress');
 
-    const miscCluster = mergedClusters.find(c => c.type === 'miscellaneous');
-    if (miscCluster) {
-      miscCluster.articles = miscCluster.articles.filter(a => !bestOfIds.has(a.id));
-    }
+    // Remove top articles from clusters to avoid repetition
+    const topArticleIds = new Set(topSelection.selected.map(a => a.id));
 
-    const curatedMain = [];
-    for (const cluster of mainClusters) {
+    const clusterSummaries = [];
+    for (const cluster of clusters) {
+      // Filter out top articles from this cluster
+      const clusterArticles = cluster.articles.filter(a => !topArticleIds.has(a.id));
+
+      if (clusterArticles.length === 0) {
+        log(`Skipping empty cluster: ${cluster.label}`, 'warn');
+        continue;
+      }
+
       try {
-        log(`Curating cluster: ${cluster.label}`, 'progress');
-        const curated = await curateMainCluster(cluster, cluster.label);
-        curatedMain.push(curated);
+        const summary = await writeClusterSummary(
+          { ...cluster, articles: clusterArticles },
+          cluster.label
+        );
+        clusterSummaries.push(summary);
       } catch (error) {
-        throw new Error(`Failed to curate cluster "${cluster.label}": ${error.message}`);
+        log(`Failed to write summary for cluster "${cluster.label}": ${error.message}`, 'error');
+        // Continue with other clusters
       }
     }
 
-    const curatedMisc = miscCluster
-      ? await curateMiscCluster(miscCluster)
-      : { label: 'Long Tail', articles: [], curatedContent: null };
+    await saveCache('cluster-summaries', clusterSummaries);
 
-    await saveCache('curated', {
-      main: curatedMain,
-      misc: curatedMisc
-    });
+    log(`Wrote ${clusterSummaries.length} cluster summaries`, 'success');
 
-    // Step 9: Write final digest with Claude
-    // Wait for rate limit window to reset after Gemini calls
+    // Step 9: Claude writes deep analysis of top articles
     log('Step 9: Waiting 60s for rate limit reset before Claude...', 'progress');
     await sleep(60000);
 
-    log('Writing final digest with Claude...', 'progress');
-    const digestResult = await writeDigest(bestOf, curatedMain, curatedMisc, {
+    log('Writing deep analysis with Claude...', 'progress');
+    const deepAnalysisResult = await writeDeepAnalysis(topSelection.selected, {
       dateRange,
       totalArticles: articles.length
     });
 
-    stats.tokensUsed.claude = digestResult.usage;
+    stats.tokensUsed.claude = deepAnalysisResult.usage;
 
-    const wordCount = estimateWordCount(digestResult.digest);
-    log(`Digest complete: ${wordCount} words`, 'success');
-
-    await saveCache('digest', {
-      content: digestResult.digest,
-      metadata: digestResult.metadata
+    await saveCache('deep-analysis', {
+      content: deepAnalysisResult.analysis
     });
 
-    // Step 10: Publish to Notion
-    log('Step 10: Publishing to Notion...', 'progress');
-    const notionResult = await publishToNotion(digestResult.digest, {
+    // Step 10: Assemble final digest
+    log('Step 10: Assembling final digest...', 'progress');
+    const finalDigest = assembleDigest(
+      deepAnalysisResult.analysis,
+      clusterSummaries,
+      {
+        dateRange,
+        totalArticles: articles.length
+      }
+    );
+
+    const wordCount = estimateWordCount(finalDigest);
+    log(`Digest assembled: ${wordCount} words`, 'success');
+
+    await saveCache('digest', {
+      content: finalDigest,
+      wordCount
+    });
+
+    // Step 11: Publish to Notion
+    log('Step 11: Publishing to Notion...', 'progress');
+    const notionResult = await publishToNotion(finalDigest, {
       dateRange,
       date: endDate
     });
@@ -235,6 +252,7 @@ async function run() {
     log(`Newsletters Found: ${stats.newslettersFound}`, 'info');
     log(`Articles Extracted: ${stats.articlesExtracted}`, 'info');
     log(`Clusters Formed: ${stats.clustersFormed}`, 'info');
+    log(`Top Articles Analyzed: ${stats.topArticlesSelected}`, 'info');
     log(`Final Word Count: ${wordCount}`, 'info');
     log(`Claude Tokens: ${stats.tokensUsed.claude.input} in / ${stats.tokensUsed.claude.output} out`, 'info');
     log(`Notion Page: ${notionResult.url}`, 'info');
@@ -251,7 +269,7 @@ async function run() {
     log(`Pipeline failed: ${error.message}`, 'error');
     console.error(error.stack);
 
-    // Save error state for debugging (sanitized to avoid sensitive data exposure)
+    // Save error state for debugging
     await saveCache('error', {
       message: error.message,
       name: error.name,

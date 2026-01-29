@@ -1,5 +1,5 @@
 /**
- * Claude AI digest writing module
+ * Claude AI module - Deep analysis of top articles only
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -14,8 +14,7 @@ const anthropic = new Anthropic({
 });
 
 const MODEL = 'claude-sonnet-4-20250514';
-const MAX_TOKENS = 32000; // Allow for comprehensive digest (15-25k words)
-const MAX_INPUT_CHARS = 150000; // ~37K tokens input - more content for longer output
+const MAX_TOKENS = 16000; // For deep analysis section
 
 const PROMPTS_DIR = new URL('../../prompts/', import.meta.url).pathname;
 
@@ -28,89 +27,43 @@ async function loadPrompt(name) {
 }
 
 /**
- * Truncate text to a maximum length
+ * Format a single article with full content for Claude
  */
-function truncateText(text, maxLength) {
-  if (!text || text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '... [truncated]';
+function formatArticleForAnalysis(article, index) {
+  const links = article.links?.slice(0, 5).map(l => `- [${l.text}](${l.url})`).join('\n') || '';
+  const primaryLink = article.links?.[0]?.url || '';
+
+  return `
+## Article ${index + 1}: ${article.subject}
+
+**Source:** ${article.source}
+**Date:** ${article.date.toLocaleDateString()}
+**Word Count:** ${article.wordCount}
+**Primary Link:** ${primaryLink}
+
+### Full Content
+
+${article.content}
+
+${links ? `### Links from Article\n${links}` : ''}
+
+---
+`.trim();
 }
 
 /**
- * Format curated content for Claude with size limits
+ * Write deep analysis of the top selected articles
+ * Claude receives FULL content of only 3-4 articles - no contamination possible
  */
-function formatCuratedContent(bestOf, mainClusters, miscCluster) {
-  let content = '';
-  const MAX_CLUSTER_CONTENT = 25000; // Max chars per cluster - increased for more detail
-  const MAX_ARTICLE_CONTENT = 4000; // Max chars per best-of article - increased for depth
+export async function writeDeepAnalysis(selectedArticles, metadata = {}) {
+  log(`Writing deep analysis for ${selectedArticles.length} top articles with Claude...`, 'progress');
 
-  // Best of Week section
-  content += '## BEST OF WEEK\n\n';
-  if (bestOf.reasoning) {
-    content += `Selection reasoning: ${bestOf.reasoning}\n\n`;
-  }
-  for (const article of bestOf.selected) {
-    content += `### ${article.subject}\n`;
-    content += `**Source:** ${article.source}\n`;
-    content += `**Date:** ${article.date.toLocaleDateString()}\n\n`;
-    content += `${truncateText(article.content, MAX_ARTICLE_CONTENT)}\n\n`;
-    // Include links if available
-    if (article.links && article.links.length > 0) {
-      const topLinks = article.links.slice(0, 3);
-      content += `**Links:**\n`;
-      for (const link of topLinks) {
-        content += `- [${link.text}](${link.url})\n`;
-      }
-      content += '\n';
-    }
-    content += '---\n\n';
-  }
+  const promptTemplate = await loadPrompt('claude-deep-analysis');
 
-  // Main topic sections
-  content += '## MAIN TOPICS\n\n';
-  for (const cluster of mainClusters) {
-    content += `### ${cluster.label}\n`;
-    content += `(${cluster.originalArticleCount || cluster.articles?.length || 0} articles, ${cluster.strategy} curation)\n\n`;
-
-    if (cluster.curatedContent) {
-      content += truncateText(cluster.curatedContent, MAX_CLUSTER_CONTENT);
-    } else if (cluster.articles) {
-      for (const article of cluster.articles.slice(0, 3)) {
-        content += `#### ${article.subject}\n`;
-        content += `${truncateText(article.content, 800)}\n\n`;
-      }
-    }
-    content += '\n---\n\n';
-  }
-
-  // Long tail section
-  content += '## LONG TAIL / MISCELLANEOUS\n\n';
-  if (miscCluster.curatedContent) {
-    content += truncateText(miscCluster.curatedContent, MAX_CLUSTER_CONTENT);
-  } else if (miscCluster.articles) {
-    for (const article of miscCluster.articles.slice(0, 5)) {
-      content += `### ${article.subject}\n`;
-      content += `**Source:** ${article.source}\n\n`;
-      content += `${truncateText(article.content, 400)}\n\n`;
-    }
-  }
-
-  // Final safety truncation
-  if (content.length > MAX_INPUT_CHARS) {
-    log(`Truncating content from ${content.length} to ${MAX_INPUT_CHARS} chars`, 'warn');
-    content = content.slice(0, MAX_INPUT_CHARS) + '\n\n[Content truncated due to length]';
-  }
-
-  return content;
-}
-
-/**
- * Write the final digest using Claude
- */
-export async function writeDigest(bestOf, mainClusters, miscCluster, metadata = {}) {
-  log('Writing final digest with Claude...', 'progress');
-
-  const promptTemplate = await loadPrompt('claude-digest');
-  const curatedContent = formatCuratedContent(bestOf, mainClusters, miscCluster);
+  // Format each article with full content
+  const formattedArticles = selectedArticles
+    .map((article, i) => formatArticleForAnalysis(article, i))
+    .join('\n\n');
 
   const dateRange = metadata.dateRange || 'This Week';
   const totalArticles = metadata.totalArticles || 0;
@@ -118,7 +71,8 @@ export async function writeDigest(bestOf, mainClusters, miscCluster, metadata = 
   const prompt = promptTemplate
     .replace('{{DATE_RANGE}}', dateRange)
     .replace('{{TOTAL_ARTICLES}}', totalArticles.toString())
-    .replace('{{CURATED_CONTENT}}', curatedContent);
+    .replace('{{SELECTED_COUNT}}', selectedArticles.length.toString())
+    .replace('{{ARTICLES}}', formattedArticles);
 
   const result = await withRetry(async () => {
     const response = await anthropic.messages.create({
@@ -141,21 +95,54 @@ export async function writeDigest(bestOf, mainClusters, miscCluster, metadata = 
     };
   }, 3, 2000);
 
-  log(`Digest written: ${result.content.length} characters, ${result.usage.outputTokens} tokens`, 'success');
+  log(`Deep analysis complete: ${result.content.length} characters`, 'success');
 
   return {
-    digest: result.content,
-    usage: result.usage,
-    metadata: {
-      model: MODEL,
-      dateRange,
-      totalArticles
-    }
+    analysis: result.content,
+    usage: result.usage
   };
 }
 
 /**
- * Estimate the word count of the digest
+ * Combine Claude's deep analysis with Gemini's cluster summaries into final digest
+ */
+export function assembleDigest(deepAnalysis, clusterSummaries, metadata = {}) {
+  const dateRange = metadata.dateRange || 'This Week';
+  const totalArticles = metadata.totalArticles || 0;
+
+  let digest = `# Weekly Research Digest\n\n`;
+  digest += `**${dateRange}** | ${totalArticles} articles processed\n\n`;
+  digest += `---\n\n`;
+
+  // Executive summary placeholder
+  digest += `## Executive Summary\n\n`;
+  digest += `This digest covers ${totalArticles} articles across ${clusterSummaries.length} topic areas. `;
+  digest += `The deep analysis section examines the most significant pieces in detail.\n\n`;
+  digest += `---\n\n`;
+
+  // Claude's deep analysis of top articles
+  digest += `## Top Stories: Deep Analysis\n\n`;
+  digest += deepAnalysis;
+  digest += `\n\n---\n\n`;
+
+  // Gemini's cluster summaries
+  digest += `## Topic Coverage\n\n`;
+  for (const cluster of clusterSummaries) {
+    if (cluster.summary && cluster.articleCount > 0) {
+      digest += cluster.summary;
+      digest += `\n\n---\n\n`;
+    }
+  }
+
+  // Open questions section
+  digest += `## Open Questions\n\n`;
+  digest += `*What remains uncertain or warrants continued monitoring across these topics.*\n\n`;
+
+  return digest;
+}
+
+/**
+ * Estimate word count
  */
 export function estimateWordCount(text) {
   return text.split(/\s+/).length;

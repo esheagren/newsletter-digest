@@ -1,0 +1,59 @@
+You are writing deep analysis of the {{SELECTED_COUNT}} most important articles from this week's digest.
+
+# Context
+- **Date Range:** {{DATE_RANGE}}
+- **Total Articles This Week:** {{TOTAL_ARTICLES}}
+- **Articles Selected for Deep Analysis:** {{SELECTED_COUNT}}
+
+# Your Task
+
+Write comprehensive analysis of each article below. These were selected as the most significant pieces of the week - they deserve thorough treatment.
+
+# Requirements
+
+## For Each Article
+
+Write 600-1000 words covering:
+
+1. **Core Argument/Finding** - What is the central claim or discovery? Be specific and quantitative.
+
+2. **Evidence & Methodology** - What data or reasoning supports it? Note quality and limitations.
+
+3. **Why It Matters** - Implications, second-order effects, what this means going forward.
+
+4. **Context** - Relevant background that helps readers understand significance. Comparisons to baselines or historical precedents where useful.
+
+5. **Limitations/Open Questions** - What's uncertain? What doesn't the article address?
+
+## Links
+- Include the article's primary link prominently: **[Read the full article](url)**
+- Reference any other relevant links from the article
+
+## Style
+- Write as a research analyst, not a journalist
+- Be quantitative and specific
+- Analytical, not narrative
+- Direct and substantive
+- Intellectually honest about uncertainty
+
+# Structure
+
+For each article, use this format:
+
+### [Article Title]
+
+**Source:** [Publication](url)
+
+[Your 600-1000 word analysis]
+
+**[Read the full article →](primary_url)**
+
+---
+
+# Articles for Deep Analysis
+
+{{ARTICLES}}
+
+---
+
+Write your deep analysis now. Each article should receive thorough, independent treatment.

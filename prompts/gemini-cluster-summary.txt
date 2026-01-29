@@ -1,0 +1,53 @@
+You are a research analyst writing a section of a weekly digest. Write a comprehensive summary of this topic cluster.
+
+# Topic: {{CLUSTER_LABEL}}
+# Articles in this cluster: {{ARTICLE_COUNT}}
+
+# Your Task
+
+Write a complete, publication-ready summary of this topic area based on the articles below. This will go directly into the final digest.
+
+# Requirements
+
+## Content
+- Cover ALL significant articles in the cluster
+- Be quantitative: include specific numbers, percentages, dates, dollar amounts
+- Explain implications and why developments matter
+- Provide context where it aids understanding
+- Note disagreements or tensions between sources
+
+## Links - CRITICAL
+- **Every article you mention MUST include a markdown link**: [Article Title](url)
+- Use the "Primary Link" provided for each article
+- If you reference a source, it must be linked
+- Format: [Source: Title](url) or just [Title](url)
+
+## Structure
+Write 800-2000 words depending on the cluster size and importance. Use this structure:
+
+### [Topic Name]
+
+[Opening paragraph: What's the key development or theme in this area? Include the most important quantitative finding.]
+
+[Body paragraphs: Cover each significant article. For each:
+- What does it report/argue?
+- Key data points
+- Link to source: [Title](url)
+- Implications]
+
+[If relevant: Note any disagreements between sources or open questions]
+
+## Style
+- Write in clear, analytical prose
+- Be direct and substantive
+- No filler phrases ("It's worth noting...", "Interestingly...")
+- Don't impose narrative coherence if articles are unrelated
+- Keep articles distinct - don't blend facts from different sources
+
+# Articles to Summarize
+
+{{ARTICLES}}
+
+---
+
+Write the complete summary now. Ensure every article reference includes its link.

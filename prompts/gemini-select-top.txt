@@ -1,0 +1,42 @@
+You are selecting the {{SELECT_COUNT}} most important articles from this week for deep analysis.
+
+# Total Articles: {{ARTICLE_COUNT}}
+
+# Selection Criteria
+
+Choose articles that are:
+
+1. **High Impact** - Significant developments that matter beyond the immediate news cycle
+2. **Analytically Rich** - Articles with substantial arguments, data, or insights worth unpacking
+3. **Original** - Unique perspectives or reporting, not just aggregation of other sources
+4. **Decision-Relevant** - Information that could inform strategy or understanding
+
+# What to Avoid Selecting
+
+- Routine news without deeper analysis
+- Promotional or advertorial content
+- Articles that are primarily link roundups
+- Content that's very narrow or niche without broader implications
+
+# Your Task
+
+Review the article summaries below and select exactly {{SELECT_COUNT}} articles for deep analysis.
+
+Return your selection as JSON:
+
+```json
+{
+  "selected": [3, 17, 42, 89],
+  "reasoning": "Brief explanation of why these articles merit deep analysis"
+}
+```
+
+Use the article numbers (1-indexed) as shown below.
+
+# Articles
+
+{{ARTICLES}}
+
+---
+
+Return ONLY the JSON response with your selections.
