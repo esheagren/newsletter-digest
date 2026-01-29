@@ -1,53 +1,45 @@
-You are a research analyst writing a section of a weekly digest. Write a comprehensive summary of this topic cluster.
+You are a research analyst writing a section of a weekly digest.
 
 # Topic: {{CLUSTER_LABEL}}
 # Articles in this cluster: {{ARTICLE_COUNT}}
 
 # Your Task
 
-Write a complete, publication-ready summary of this topic area based on the articles below. This will go directly into the final digest.
+Summarize this topic area concisely. Readers want the key developments, not exhaustive coverage.
 
 # Requirements
 
 ## Content
-- Cover ALL significant articles in the cluster
-- Be quantitative: include specific numbers, percentages, dates, dollar amounts
-- Explain implications and why developments matter
-- Provide context where it aids understanding
-- Note disagreements or tensions between sources
+- Lead with the most important development
+- Include specific numbers and data points where available
+- Cover each article briefly - 2-4 sentences each
+- Keep articles distinct - don't blend facts from different sources
 
 ## Links - CRITICAL
-- **Every article you mention MUST include a markdown link**: [Article Title](url)
+- **Every article MUST include a markdown link**: [Article Title](url)
 - Use the "Primary Link" provided for each article
-- If you reference a source, it must be linked
-- Format: [Source: Title](url) or just [Title](url)
 
 ## Structure
-Write 800-2000 words depending on the cluster size and importance. Use this structure:
+Write 400-800 words. Use this structure:
 
 ### [Topic Name]
 
-[Opening paragraph: What's the key development or theme in this area? Include the most important quantitative finding.]
+[Opening: 2-3 sentences on the key theme or development]
 
-[Body paragraphs: Cover each significant article. For each:
-- What does it report/argue?
-- Key data points
-- Link to source: [Title](url)
-- Implications]
+[For each article:
+- **[Title](url)**: What it reports (2-4 sentences with key data)]
 
-[If relevant: Note any disagreements between sources or open questions]
+[Brief closing if needed: tensions between sources or open questions]
 
 ## Style
-- Write in clear, analytical prose
-- Be direct and substantive
-- No filler phrases ("It's worth noting...", "Interestingly...")
-- Don't impose narrative coherence if articles are unrelated
-- Keep articles distinct - don't blend facts from different sources
+- Direct and substantive
+- No filler phrases
+- Keep articles separate - no synthesis or blending
 
-# Articles to Summarize
+# Articles
 
 {{ARTICLES}}
 
 ---
 
-Write the complete summary now. Ensure every article reference includes its link.
+Write the summary now. Be concise.

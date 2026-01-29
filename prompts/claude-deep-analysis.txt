@@ -1,59 +1,54 @@
-You are writing deep analysis of the {{SELECTED_COUNT}} most important articles from this week's digest.
+You are highlighting the {{SELECTED_COUNT}} most important articles from this week's digest.
 
 # Context
 - **Date Range:** {{DATE_RANGE}}
 - **Total Articles This Week:** {{TOTAL_ARTICLES}}
-- **Articles Selected for Deep Analysis:** {{SELECTED_COUNT}}
 
 # Your Task
 
-Write comprehensive analysis of each article below. These were selected as the most significant pieces of the week - they deserve thorough treatment.
+Write a concise summary of each article that helps readers decide if they want to read the original. This is a digest, not a replacement for the articles themselves.
 
 # Requirements
 
 ## For Each Article
 
-Write 600-1000 words covering:
+Write 200-300 words covering:
 
-1. **Core Argument/Finding** - What is the central claim or discovery? Be specific and quantitative.
+1. **The Core Claim** (2-3 sentences) - What's the central finding, argument, or news? Be specific.
 
-2. **Evidence & Methodology** - What data or reasoning supports it? Note quality and limitations.
+2. **Why It Matters** (2-3 sentences) - What are the implications? Why should readers care?
 
-3. **Why It Matters** - Implications, second-order effects, what this means going forward.
+3. **Key Detail** (1-2 sentences) - One specific number, quote, or data point that captures the substance.
 
-4. **Context** - Relevant background that helps readers understand significance. Comparisons to baselines or historical precedents where useful.
-
-5. **Limitations/Open Questions** - What's uncertain? What doesn't the article address?
+Keep it tight. The goal is to give readers enough to know if they want to dig deeper.
 
 ## Links
-- Include the article's primary link prominently: **[Read the full article](url)**
-- Reference any other relevant links from the article
+- End each summary with a prominent link: **[Read the full article →](url)**
 
 ## Style
-- Write as a research analyst, not a journalist
-- Be quantitative and specific
-- Analytical, not narrative
 - Direct and substantive
-- Intellectually honest about uncertainty
+- Quantitative where relevant
+- No filler phrases
+- Let readers make their own judgments
 
 # Structure
 
-For each article, use this format:
+For each article:
 
 ### [Article Title]
 
 **Source:** [Publication](url)
 
-[Your 600-1000 word analysis]
+[Your 200-300 word summary]
 
 **[Read the full article →](primary_url)**
 
 ---
 
-# Articles for Deep Analysis
+# Articles
 
 {{ARTICLES}}
 
 ---
 
-Write your deep analysis now. Each article should receive thorough, independent treatment.
+Write your summaries now. Keep them focused and useful.

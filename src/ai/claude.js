@@ -104,29 +104,72 @@ export async function writeDeepAnalysis(selectedArticles, metadata = {}) {
 }
 
 /**
+ * Extract article titles from the deep analysis for the executive summary
+ * Handles both "### [Title]" and "### Title" formats
+ */
+function extractTopStoryTitles(deepAnalysis) {
+  if (!deepAnalysis) return [];
+
+  const titles = [];
+  const regex = /^### (?:\[(.+?)\]|(.+))$/gm;
+  let match;
+  while ((match = regex.exec(deepAnalysis)) !== null) {
+    // match[1] is bracketed title, match[2] is non-bracketed
+    titles.push(match[1] || match[2]);
+  }
+  return titles;
+}
+
+/**
+ * Extract cluster labels for the executive summary
+ */
+function extractClusterTopics(clusterSummaries) {
+  if (!Array.isArray(clusterSummaries)) return [];
+
+  return clusterSummaries
+    .filter(c => c?.summary && c?.articleCount > 0)
+    .map(c => c.label)
+    .slice(0, 6);
+}
+
+/**
  * Combine Claude's deep analysis with Gemini's cluster summaries into final digest
  */
 export function assembleDigest(deepAnalysis, clusterSummaries, metadata = {}) {
   const dateRange = metadata.dateRange || 'This Week';
   const totalArticles = metadata.totalArticles || 0;
 
-  let digest = `# Weekly Research Digest\n\n`;
-  digest += `**${dateRange}** | ${totalArticles} articles processed\n\n`;
+  const topStoryTitles = extractTopStoryTitles(deepAnalysis);
+  const clusterTopics = extractClusterTopics(clusterSummaries);
+
+  let digest = `# Weekly Digest\n\n`;
+  digest += `**${dateRange}** · ${totalArticles} articles processed\n\n`;
   digest += `---\n\n`;
 
-  // Executive summary placeholder
-  digest += `## Executive Summary\n\n`;
-  digest += `This digest covers ${totalArticles} articles across ${clusterSummaries.length} topic areas. `;
-  digest += `The deep analysis section examines the most significant pieces in detail.\n\n`;
+  // Executive Summary - bullet points
+  digest += `## This Week\n\n`;
+
+  if (topStoryTitles.length > 0) {
+    digest += `**Top Stories**\n`;
+    for (const title of topStoryTitles) {
+      digest += `- ${title}\n`;
+    }
+    digest += `\n`;
+  }
+
+  if (clusterTopics.length > 0) {
+    digest += `**Also Covered:** ${clusterTopics.join(' · ')}\n\n`;
+  }
+
   digest += `---\n\n`;
 
   // Claude's deep analysis of top articles
-  digest += `## Top Stories: Deep Analysis\n\n`;
+  digest += `## Top Stories\n\n`;
   digest += deepAnalysis;
   digest += `\n\n---\n\n`;
 
   // Gemini's cluster summaries
-  digest += `## Topic Coverage\n\n`;
+  digest += `## By Topic\n\n`;
   for (const cluster of clusterSummaries) {
     if (cluster.summary && cluster.articleCount > 0) {
       digest += cluster.summary;
@@ -134,9 +177,9 @@ export function assembleDigest(deepAnalysis, clusterSummaries, metadata = {}) {
     }
   }
 
-  // Open questions section
-  digest += `## Open Questions\n\n`;
-  digest += `*What remains uncertain or warrants continued monitoring across these topics.*\n\n`;
+  // Brief closing
+  digest += `## What to Watch\n\n`;
+  digest += `Check back next week for continued coverage of these developing areas.\n`;
 
   return digest;
 }
